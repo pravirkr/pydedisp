@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
-#include <dedisp.h>
+#include <dedisp/dedisp.hpp>
 float gasdev(long *idum);
 
 // Assume input is a 0 mean float and quantize to an unsigned 8-bit quantity

@@ -1,18 +1,74 @@
 cmake_minimum_required(VERSION 3.0.0)
 
-include(CheckLanguage)
-check_language(CUDA)
+project(dedisp VERSION 1.0.1 LANGUAGES C CXX)
+
+option(ENABLE_CLANG_TIDY "Run Clang Tidy to get static analysis" OFF)
+option(BUILD_DOCS        "Build documentation" ON)
+option(BUILD_SRC         "Build dedisp" ON)
+
+#set(CMAKE_BUILD_TYPE Release)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CUDA_STANDARD 11)
-set(CMAKE_CUDA_STANDARD_REQUIRED True)
+set(CMAKE_CXX_FLAGS "-Wall")
 
-project(dedisp VERSION 1.0.1 LANGUAGES CXX CUDA)
+set(ENV{CUDACXX} $ENV{CUDA_PATH}/bin/nvcc)
+include(CheckLanguage)
+check_language(CUDA)
 
-# CUDA NVCC FLAGS
-set(CMAKE_CUDA_FLAGS -c -Xcompiler "-fPIC -Wall" -O3 -arch sm_60)
+if(CMAKE_CUDA_COMPILER AND BUILD_SRC)
+    enable_language(CUDA)
+    if (CMAKE_CUDA_COMPILER_VERSION VERSION_LESS_EQUAL 10.0.0)
+        message(FATAL_ERROR "Found CUDA ${CMAKE_CUDA_COMPILER_VERSION}. Need CUDA 10+")
+    else()
+        message(STATUS "Found CUDA ${CMAKE_CUDA_COMPILER_VERSION}.")
+    endif()
 
-add_subdirectory("src")
-add_subdirectory("example")
+    set(CMAKE_CUDA_STANDARD 11)
+    set(CMAKE_CUDA_STANDARD_REQUIRED True)
+    set(CMAKE_CUDA_FLAGS "-c -Xcompiler=-Wall -O3 -arch=sm_60 -Wno-deprecated-declarations")
+
+    add_subdirectory("src")
+    add_subdirectory("example")
+elseif(NOT CMAKE_CUDA_COMPILER)
+    message(STATUS "Not building src. No CUDA compiler found...")
+endif(CMAKE_CUDA_COMPILER AND BUILD_SRC)
+
+if(BUILD_DOCS)
+	message(STATUS "Building Docs...")
+	# Add the cmake folder so the FindSphinx module is found
+	set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
+    add_subdirectory("docs")
+endif(BUILD_DOCS)
+
+# ------------------------------------------------------------------------------
+# Clang Tidy
+# ------------------------------------------------------------------------------
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(ENABLE_CLANG_TIDY)
+    find_program(CLANG_TIDY_BIN clang-tidy)
+    find_program(RUN_CLANG_TIDY_BIN run-clang-tidy)
+
+    if(CLANG_TIDY_BIN STREQUAL "CLANG_TIDY_BIN-NOTFOUND")
+        message(FATAL_ERROR "unable to locate clang-tidy")
+    endif()
+
+    if(RUN_CLANG_TIDY_BIN STREQUAL "RUN_CLANG_TIDY_BIN-NOTFOUND")
+        message(FATAL_ERROR "unable to locate run-clang-tidy")
+    endif()
+
+    list(APPEND RUN_CLANG_TIDY_BIN_ARGS
+        -clang-tidy-binary ${CLANG_TIDY_BIN}
+        -header-filter=.*
+        -checks=clan*,cert*,misc*,perf*,cppc*,read*,mode*,-cert-err58-cpp,-misc-noexcept-move-constructor
+    )
+
+    add_custom_target(
+        tidy
+        COMMAND ${RUN_CLANG_TIDY_BIN} ${RUN_CLANG_TIDY_BIN_ARGS}
+        COMMENT "running clang tidy"
+    )
+
+endif()

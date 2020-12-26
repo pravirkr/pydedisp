@@ -24,7 +24,7 @@
 //#define DEDISP_DEBUG
 //#define DEDISP_BENCHMARK
 
-#include <dedisp.h>
+#include <dedisp/dedisp.hpp>
 
 #include <vector>
 #include <algorithm> // For std::fill

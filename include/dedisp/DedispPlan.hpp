@@ -24,7 +24,7 @@
 #include <string>
 #include <sstream>
 
-#include <dedisp.h>
+#include <dedisp/dedisp.hpp>
 
 class DedispPlan {
 	// Private members
