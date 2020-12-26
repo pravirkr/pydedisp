@@ -29,6 +29,10 @@ The library requires NVIDIA's [CUDA](http://www.nvidia.com/object/cuda_home_new.
 
 * [CUDA 10.0+](https://developer.nvidia.com/cuda-toolkit-archive)
 * [CMake 3.0+](https://cmake.org/download/)
+* [Doxygen](http://www.doxygen.nl/download.html)
+* [Sphinx](https://www.sphinx-doc.org/en/master/usage/installation.html)
+* [Breathe](https://pypi.org/project/breathe/)
+* [sphinx_rtd_theme](https://sphinx-rtd-theme.readthedocs.io/en/stable/)
 
 ## Installation
 
