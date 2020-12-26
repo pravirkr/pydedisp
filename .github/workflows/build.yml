@@ -1,0 +1,117 @@
+name: Build
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04]
+        gcc: [8]
+        cuda: ["10.2", "11.0"]
+    env:
+      build_dir: "build"
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install CUDA
+      env:
+        cuda: ${{ matrix.cuda }}
+      run: |
+        wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-ubuntu1804.pin
+        sudo mv cuda-ubuntu1804.pin /etc/apt/preferences.d/cuda-repository-pin-600
+        sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+        sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/ /"
+        sudo apt-get update
+
+        CUDA_MAJOR=$(echo "${cuda}" | cut -d. -f1)
+        CUDA_MINOR=$(echo "${cuda}" | cut -d. -f2)
+
+        # Minimal set of packages to install
+        # libraries-dev for additional CUDA libraries
+        CUDA_MINIMAL=("minimal-build")
+        CUDA_PACKAGES=""
+        for package in "${CUDA_MINIMAL[@]}"; do CUDA_PACKAGES+=" cuda-${package}-${CUDA_MAJOR}-${CUDA_MINOR}"; done
+        echo "Installing CUDA package ${CUDA_PACKAGES}"
+
+        sudo apt-get -y install ${CUDA_PACKAGES}
+
+        # Set paths for subsequent steps, using ${CUDA_PATH}
+        echo "Adding CUDA to CUDA_PATH, PATH and LD_LIBRARY_PATH"
+
+        CUDA_PATH=/usr/local/cuda-${CUDA_MAJOR}.${CUDA_MINOR}
+        echo "CUDA_PATH=${CUDA_PATH}" >> $GITHUB_ENV
+        echo "CUDA_HOME=${CUDA_PATH}" >> $GITHUB_ENV
+        echo "LIBRARY_PATH=${CUDA_PATH}/lib64${LIBRARY_PATH:+:${LIBRARY_PATH}}" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=${CUDA_PATH}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" >> $GITHUB_ENV
+        echo "${CUDA_PATH}/bin" >> $GITHUB_PATH
+      shell: bash
+
+    # Specify the correct host compilers
+    - name: Install/Select gcc and g++
+      env:
+        gcc: ${{ matrix.gcc }}
+      run: |
+        sudo apt-get -y install gcc-${gcc} g++-${gcc}
+        echo "CC=/usr/bin/gcc-${gcc}" >> $GITHUB_ENV
+        echo "CXX=/usr/bin/g++-${gcc}" >> $GITHUB_ENV
+        echo "CUDAHOSTCXX=/usr/bin/g++-${gcc}" >> $GITHUB_ENV
+
+    - name: Install CMake and clang tools
+      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install git build-essential cmake clang-tidy clang-format doxygen graphviz
+
+    - name: Install Sphinx, breathe, and sphinx_rtd_theme
+      run: |
+        sudo pip3 install sphinx
+        sudo pip3 install breathe
+        sudo pip3 install sphinx_rtd_theme
+
+    - name: Configure CMake
+      id: configure
+      run: cmake . -B ${{ env.build_dir }} -Werror=dev #-DENABLE_CLANG_TIDY=ON
+
+    - name: Configure Error Processing
+      working-directory: ${{ env.build_dir }}
+      shell: bash
+      if: ${{ failure() && steps.configure.outcome == 'failure' }}
+      run: |
+        if [[ -f "CMakeFiles/CMakeOutput.log" ]]; then
+          echo "---- CMakeFiles/CMakeOutput.log"
+          cat CMakeFiles/CMakeOutput.log
+          echo "----"
+        fi
+        if [[ -f "CMakeFiles/CMakeError.log" ]]; then
+          echo "---- CMakeFiles/CMakeError.log"
+          cat CMakeFiles/CMakeError.log
+          echo "----"
+        fi
+
+    - name: Build
+      working-directory: ${{ env.build_dir }}
+      shell: bash
+      # Execute the build.  You can specify a specific target with "--target <NAME>"
+      # cmake --install . --verbose
+      run: |
+        cmake --build . --target all --verbose
+
+    #- name: Example test
+    #  shell: bash
+    #  run: |
+    #    echo "Adding dedisp to LD_LIBRARY_PATH"
+    #    echo "LD_LIBRARY_PATH=${PWD}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" >> $GITHUB_ENV
+    #    ./bin/heimdall -f tests/data/askap_frb171019.fil -v
