@@ -49,3 +49,6 @@ docs/_build/
 docs/_static/
 docs/_templates/
 doc/_build/
+
+# Editor
+.vscode/

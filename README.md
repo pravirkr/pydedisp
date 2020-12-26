@@ -8,7 +8,7 @@ dedisp uses a GPU to perform the computationally intensive task of computing the
 
 dedisp provides a simple C interface to computing dedispersion transforms using a GPU. The interface is modelled on that of the well-known [FFTW](http://www.fftw.org/) library, and uses an object-oriented approach. The user first creates a dedispersion _plan_, and then calls functions to modify or execute that plan. A full list and description of the functions provided by the library can be viewed in the API documentation below.
 
-For a detailed discussion of how the library implements dedispersion on the GPU, see [Barsdell et al. 2012](http://adsabs.harvard.edu/abs/2012arXiv1201.5380B). If you use the library in your work, please consider citing this paper.
+For a detailed discussion of how the library implements dedispersion on the GPU, see [Barsdell et al. 2012](https://ui.adsabs.harvard.edu/abs/2012MNRAS.422..379B). If you use the library in your work, please consider citing this paper.
 
 ## Features
 
@@ -27,13 +27,17 @@ For a detailed discussion of how the library implements dedispersion on the GPU,
 
 The library requires NVIDIA's [CUDA](http://www.nvidia.com/object/cuda_home_new.html) in order to access the GPU. This also imposes the constraint that the target hardware must be an NVIDIA GPU. To compile the library you must have the NVIDIA CUDA C compiler _nvcc_ in your path.
 
+* [CUDA 10.0+](https://developer.nvidia.com/cuda-toolkit-archive)
+* [CMake 3.0+](https://cmake.org/download/)
+
 ## Installation
 
 1. Update Makefile.inc with your CUDA path, Install Dir and GPU architecture. e.g.
     * CUDA_PATH ?= /usr/local/cuda-8.0.61
     * INSTALL_DIR = $(HOME)/opt/dedisp
     * GPU_ARCH = sm_60
-2. make && make install
+2. mkdir build && cd build && cmake ..
+3. make && make install
 
 This will build a shared object library named libdedisp.so which is a prerequisite for Heimdall. The dedisp header files will be installed into INSTALL_DIR/include and the library into INSTALL_DIR/lib.
 
