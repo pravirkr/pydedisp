@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.15)
 
-project(dedisp VERSION 1.0.1 LANGUAGES C CXX)
+project(dedisp VERSION 1.0.0 LANGUAGES C CXX)
 
 option(ENABLE_CLANG_TIDY "Run Clang Tidy to get static analysis" OFF)
-option(BUILD_DOCS        "Build documentation" ON)
+option(BUILD_DOCS        "Build documentation" OFF)
 option(BUILD_SRC         "Build dedisp" ON)
+option(BUILD_PYTHON      "Build python bindings" ON)
 
 #set(CMAKE_BUILD_TYPE Release)
 
@@ -41,6 +42,34 @@ if(BUILD_DOCS)
 
     add_subdirectory("docs")
 endif(BUILD_DOCS)
+
+if(BUILD_PYTHON)
+    message(STATUS "Building Python bindings...")
+
+    find_package(Python COMPONENTS Interpreter Development)
+
+    # pybind11 hint
+    execute_process(
+        COMMAND
+          "${Python_EXECUTABLE}" -c
+          "import pybind11; print(pybind11.get_cmake_dir())"
+        OUTPUT_VARIABLE _tmp_dir
+        OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ECHO STDOUT
+    )
+
+    list(APPEND CMAKE_PREFIX_PATH "${_tmp_dir}")
+
+    # Now we can find pybind11
+    find_package(pybind11 CONFIG REQUIRED)
+
+    # pybind11 method:
+    pybind11_add_module(libdedisp MODULE ${PROJECT_SOURCE_DIR}/pydedisp/bindings.cpp)
+    target_include_directories(libdedisp PRIVATE ${PROJECT_SOURCE_DIR}/include)
+    target_link_libraries(libdedisp PRIVATE ${PROJECT_NAME})
+
+    install (TARGETS libdedisp DESTINATION ${PROJECT_SOURCE_DIR}/lib)
+
+endif(BUILD_PYTHON)
 
 # ------------------------------------------------------------------------------
 # Clang Tidy
