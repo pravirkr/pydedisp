@@ -1,14 +1,24 @@
-# dedisp
+# pydedisp
 
-This repositry is derived from Ben Barsdell's original GPU De-dedispersion library (code.google.com/p/dedisp)
+`pydedisp` is a GPU/CPU De-dedispersion library for python.
+
+[![GitHub CI](https://github.com/pravirkr/pydedisp/workflows/Build/badge.svg)](https://github.com/pravirkr/pydedisp/actions)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7993c188ab344bb9af9cf8de0236615a)](https://www.codacy.com/gh/pravirkr/pydedisp/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=pravirkr/pydedisp&amp;utm_campaign=Badge_Grade)
 
 ## Introduction
 
-dedisp uses a GPU to perform the computationally intensive task of computing the incoherent dedispersion transform, a frequent operation in signal processing and time-domain radio astronomy. It currently uses NVIDIA's CUDA platform and supports all CUDA-capable GPUs.
+Based on Ben Barsdell's original [GPU De-dedispersion library](https://github.com/ajameson/dedisp), pydedisp uses
+a GPU to perform the computationally intensive task of computing the incoherent dedispersion transform, a frequent
+operation in signal processing and time-domain radio astronomy.
 
-dedisp provides a simple C interface to computing dedispersion transforms using a GPU. The interface is modelled on that of the well-known [FFTW](http://www.fftw.org/) library, and uses an object-oriented approach. The user first creates a dedispersion _plan_, and then calls functions to modify or execute that plan. A full list and description of the functions provided by the library can be viewed in the API documentation below.
+dedisp provides a simple C interface to computing dedispersion transforms using a GPU. The interface is modelled on
+that of the well-known [FFTW](http://www.fftw.org/) library, and uses an object-oriented approach. The user first
+creates a dedispersion _plan_, and then calls functions to modify or execute that plan. A full list and description
+of the functions provided by the library can be viewed in the API documentation below.
 
-For a detailed discussion of how the library implements dedispersion on the GPU, see [Barsdell et al. 2012](https://ui.adsabs.harvard.edu/abs/2012MNRAS.422..379B). If you use the library in your work, please consider citing this paper.
+For a detailed discussion of how the library implements dedispersion on the GPU,
+see [Barsdell et al. 2012](https://ui.adsabs.harvard.edu/abs/2012MNRAS.422..379B).
+If you use the library in your work, please consider citing this paper.
 
 ## Features
 
@@ -25,7 +35,9 @@ For a detailed discussion of how the library implements dedispersion on the GPU,
 
 ## Dependencies
 
-The library requires NVIDIA's [CUDA](http://www.nvidia.com/object/cuda_home_new.html) in order to access the GPU. This also imposes the constraint that the target hardware must be an NVIDIA GPU. To compile the library you must have the NVIDIA CUDA C compiler _nvcc_ in your path.
+The library requires NVIDIA's [CUDA](https://developer.nvidia.com/cuda-zone) in order to access the GPU.
+This also imposes the constraint that the target hardware must be an NVIDIA GPU.
+To compile the library you must have the NVIDIA CUDA C compiler _nvcc_ in your path.
 
 * [CUDA 10.0+](https://developer.nvidia.com/cuda-toolkit-archive)
 * [CMake 3.0+](https://cmake.org/download/)
@@ -43,7 +55,8 @@ The library requires NVIDIA's [CUDA](http://www.nvidia.com/object/cuda_home_new.
 2. mkdir build && cd build && cmake ..
 3. make && make install
 
-This will build a shared object library named libdedisp.so which is a prerequisite for Heimdall. The dedisp header files will be installed into INSTALL_DIR/include and the library into INSTALL_DIR/lib.
+This will build a shared object library named libdedisp.so which is a prerequisite for Heimdall.
+The dedisp header files will be installed into INSTALL_DIR/include and the library into INSTALL_DIR/lib.
 
 ## Debugging
 
@@ -52,7 +65,3 @@ debug mode, which will print the location and description of errors as
 they happen:
 
 `$ make DEDISP_DEBUG=1`
-
-## C++ Interface
-
-A simple C++ wrapper for the library is also provided; see [DedispPlan.hpp](http://code.google.com/p/dedisp/source/browse/trunk/src/DedispPlan.hpp).

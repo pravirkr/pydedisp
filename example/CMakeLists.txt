@@ -1,7 +1,4 @@
-add_executable(testdedisp
-    testdedisp.c
-    gasdev.c
-    ran1.c)
+add_executable(testdedisp testdedisp.cpp)
 
 target_include_directories(testdedisp PRIVATE ${PROJECT_SOURCE_DIR}/include)
 

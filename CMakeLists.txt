@@ -1,17 +1,21 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(dedisp VERSION 1.0.0 LANGUAGES C CXX)
+project(dedisp VERSION 1.0.0 LANGUAGES CXX)
 
 option(ENABLE_CLANG_TIDY "Run Clang Tidy to get static analysis" OFF)
 option(BUILD_DOCS        "Build documentation" OFF)
 option(BUILD_SRC         "Build dedisp" ON)
 option(BUILD_PYTHON      "Build python bindings" ON)
 
-#set(CMAKE_BUILD_TYPE Release)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(ENV{CUDACXX} $ENV{CUDA_PATH}/bin/nvcc)
 include(CheckLanguage)
@@ -27,7 +31,9 @@ if(CMAKE_CUDA_COMPILER AND BUILD_SRC)
 
     set(CMAKE_CUDA_STANDARD 11)
     set(CMAKE_CUDA_STANDARD_REQUIRED True)
-    set(CMAKE_CUDA_FLAGS "-c -Xcompiler=-Wall -O3 -arch=sm_60 -Wno-deprecated-declarations")
+    set(CMAKE_CUDA_FLAGS "-c -Xcompiler=-Wall -arch=sm_60 -Wno-deprecated-declarations")
+    set(CMAKE_CUDA_FLAGS_DEBUG "-g")
+    set(CMAKE_CUDA_FLAGS_RELEASE "-O3")
 
     add_subdirectory("src")
     add_subdirectory("example")
