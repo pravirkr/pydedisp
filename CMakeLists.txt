@@ -69,11 +69,11 @@ if(BUILD_PYTHON)
     find_package(pybind11 CONFIG REQUIRED)
 
     # pybind11 method:
-    pybind11_add_module(libdedisp MODULE ${PROJECT_SOURCE_DIR}/pydedisp/bindings.cpp)
-    target_include_directories(libdedisp PRIVATE ${PROJECT_SOURCE_DIR}/include)
-    target_link_libraries(libdedisp PRIVATE ${PROJECT_NAME})
+    pybind11_add_module(_libdedisp MODULE ${PROJECT_SOURCE_DIR}/pydedisp/bindings.cpp)
+    target_include_directories(_libdedisp PRIVATE ${PROJECT_SOURCE_DIR}/include)
+    target_link_libraries(_libdedisp PRIVATE ${PROJECT_NAME})
 
-    install (TARGETS libdedisp DESTINATION ${PROJECT_SOURCE_DIR}/lib)
+    install (TARGETS _libdedisp DESTINATION ${PROJECT_SOURCE_DIR}/lib)
 
 endif(BUILD_PYTHON)
 

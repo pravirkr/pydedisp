@@ -31,7 +31,7 @@ inline pybind11::array_t<T> get_ndarray_readonly(const T* in_array,
 }
 }  // namespace array_utils
 
-PYBIND11_MODULE(libdedisp, mod) {
+PYBIND11_MODULE(_libdedisp, mod) {
     mod.doc()               = "dedisp class functions";
     //mod.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
 
@@ -49,7 +49,7 @@ PYBIND11_MODULE(libdedisp, mod) {
                                    return plan.get_gulp_size();
                                })
         .def_property_readonly("max_delay",
-                               [](const DedispPlan& plan) -> dedisp_float {
+                               [](const DedispPlan& plan) -> dedisp_size {
                                    return plan.get_max_delay();
                                })
         .def_property_readonly("channel_count",
@@ -89,10 +89,7 @@ PYBIND11_MODULE(libdedisp, mod) {
             },
             py::return_value_policy::move)
 
-        .def_static("set_device",
-                    [](DedispPlan& plan, int device_idx) {
-                        plan.set_device(device_idx);
-                    })
+        .def_static("set_device", &DedispPlan::set_device)
 
         .def("set_gulp_size",
              [](DedispPlan& plan, dedisp_size gulp_size) {

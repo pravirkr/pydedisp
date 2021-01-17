@@ -58,7 +58,7 @@ public:
                           float_type ti,
                           float_type tol);
     size_type get_gulp_size() const;
-    float_type get_max_delay() const;
+    size_type get_max_delay() const;
     size_type get_channel_count() const;
     size_type get_dm_count() const;
     float_type get_dt() const;
@@ -140,7 +140,7 @@ DedispPlan::size_type DedispPlan::get_gulp_size() const {
     return dedisp_get_gulp_size(m_plan);
 }
 
-DedispPlan::float_type DedispPlan::get_max_delay() const {
+DedispPlan::size_type DedispPlan::get_max_delay() const {
     return dedisp_get_max_delay(m_plan);
 }
 

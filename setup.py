@@ -26,7 +26,7 @@ def get_version(rel_path):
 # If you need multiple extensions, see scikit-build.
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=""):
-        super().__init__(self, name, sources=[])
+        Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
 
@@ -61,6 +61,6 @@ package_version = get_version("pydedisp/__init__.py")
 setup(
     name="pydedisp",
     version=package_version,
-    ext_modules=[CMakeExtension("libdedisp")],
+    ext_modules=[CMakeExtension("pydedisp._libdedisp")],
     cmdclass={"build_ext": CMakeBuild},
 )

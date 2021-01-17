@@ -73,42 +73,42 @@ jobs:
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
       run: |
         sudo apt-get update
-        sudo apt-get -y install git build-essential cmake clang-tidy clang-format doxygen graphviz
+        sudo apt-get -y install git build-essential cmake clang-tidy clang-format doxygen
 
     - name: Install Sphinx, breathe, and sphinx_rtd_theme
       run: |
-        sudo pip3 install sphinx
-        sudo pip3 install breathe
-        sudo pip3 install sphinx_rtd_theme
+        sudo pip3 install sphinx breathe sphinx_rtd_theme
         sudo pip3 install pybind11
 
-    - name: Configure CMake
-      id: configure
-      run: cmake . -B ${{ env.build_dir }} -Werror=dev #-DENABLE_CLANG_TIDY=ON
-
-    - name: Configure Error Processing
-      working-directory: ${{ env.build_dir }}
-      shell: bash
-      if: ${{ failure() && steps.configure.outcome == 'failure' }}
+    - name: Install it
       run: |
-        if [[ -f "CMakeFiles/CMakeOutput.log" ]]; then
-          echo "---- CMakeFiles/CMakeOutput.log"
-          cat CMakeFiles/CMakeOutput.log
-          echo "----"
-        fi
-        if [[ -f "CMakeFiles/CMakeError.log" ]]; then
-          echo "---- CMakeFiles/CMakeError.log"
-          cat CMakeFiles/CMakeError.log
-          echo "----"
-        fi
+        python -m pip install -U pip setuptools wheel
+        python -m pip install -e .[tests] -v
 
-    - name: Build
-      working-directory: ${{ env.build_dir }}
-      shell: bash
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
-      # cmake --install . --verbose
+    - name: Run pytest and Generate coverage report
       run: |
-        cmake --build . --target all --verbose
+        pip install pytest pytest-cov
+        pytest --cov=./ --cov-report=xml
+      continue-on-error: true
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    #
+    #- name: Configure CMake
+    #  id: configure
+    #  run: cmake . -B ${{ env.build_dir }} -Werror=dev #-DENABLE_CLANG_TIDY=ON
+
+    #- name: Build
+    #  working-directory: ${{ env.build_dir }}
+    #  shell: bash
+    #  # Execute the build.  You can specify a specific target with "--target <NAME>"
+    #  # cmake --install . --verbose
+    #  run: |
+    #    cmake --build . --target all --verbose
 
     #- name: Example test
     #  shell: bash
