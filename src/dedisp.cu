@@ -53,6 +53,7 @@ using std::endl;
 #endif
 // -----------------------------------------
 
+#include "utils.hpp"
 #include "gpu_memory.hpp"
 #include "transpose.hpp"
 
@@ -100,10 +101,7 @@ struct dedisp_plan_struct {
 	
 };
 
-// Private helper functions
-// ------------------------
-template<typename T>
-T min(T a, T b) { return a<b ? a : b; }
+
 unsigned long div_round_up(unsigned long a, unsigned long b) {
 	return (a-1) / b + 1;
 }

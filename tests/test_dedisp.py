@@ -69,7 +69,7 @@ class TestDedisp:
         assert dmt.shape == (mydedisp.dm_count, data.shape[1] - mydedisp.max_delay)
 
 
-def benchmark_dedisp(header, benchmark):
+def test_benchmark_dedisp(header, benchmark):
     mydedisp = Dedisp(
         header["nchans"], header["tsamp"], header["fch1"], header["foff"]
     )

@@ -20,139 +20,154 @@
 
 #pragma once
 
-typedef unsigned int gpu_size_t;
+#include <cstddef>
 
-template<typename T>
+using gpu_size_t = std::size_t;
+
+/**
+ * @brief Allocate memory on the device
+ *
+ * @tparam T
+ * @param addr   Pointer to allocate memory.
+ * @param count  Number of memory blocks to allocate.
+ * @return true  If allocation is successful.
+ * @return false If device memory allocation fails.
+ */
+template <typename T>
 bool malloc_device(T*& addr, gpu_size_t count) {
-	cudaError_t error = cudaMalloc((void**)&addr, count*sizeof(T));
-	if( error != cudaSuccess ) {
-		return false;
-	}
-	return true;
+    cudaError_t error = cudaMalloc((void**)&addr, count * sizeof(T));
+    if (error != cudaSuccess) {
+        return false;
+    }
+    return true;
 }
-template<typename T>
+
+/**
+ * @brief Free device memory
+ *
+ * @tparam T
+ * @param addr Device pointer
+ */
+template <typename T>
 void free_device(T*& addr) {
-	cudaFree(addr);
-	addr = 0;
+    cudaFree(addr);
+    addr = 0;
 }
-template<typename T>
-bool copy_host_to_device(T* dst, const T* src,
-						 gpu_size_t count, cudaStream_t stream=0) {
-	// TODO: Can't use Async versions unless host memory is pinned!
-	// TODO: Passing a device pointer as src causes this to segfault
-	cudaMemcpy/*Async*/(dst, src, count*sizeof(T),
-						cudaMemcpyHostToDevice/*, stream*/);
-	//#ifdef DEDISP_DEBUG
-	cudaThreadSynchronize();
-	cudaError_t error = cudaGetLastError();
-	if( error != cudaSuccess ) {
-		return false;
-	}
-	//#endif
-	return true;
+
+/**
+ * @brief Copy host memory to device memory.
+ *
+ * @tparam T
+ * @param dst    Device pointer.
+ * @param src    Host pointer.
+ * @param count  Number of memory blocks to copy.
+ * @return true  If copy is successful.
+ * @return false If data copy fails.
+ */
+template <typename T>
+bool copy_host_to_device(T* dst, const T* src, gpu_size_t count) {
+    cudaMemcpy(dst, src, count * sizeof(T), cudaMemcpyHostToDevice);
+    cudaDeviceSynchronize();
+    cudaError_t error = cudaGetLastError();
+    if (error != cudaSuccess) {
+        return false;
+    }
+    return true;
 }
-template<typename T>
-bool copy_device_to_host(T* dst, const T* src,
-						 gpu_size_t count, cudaStream_t stream=0) {
-	// TODO: Can't use Async versions unless host memory is pinned!
-	cudaMemcpy/*Async*/(dst, src, count*sizeof(T),
-						cudaMemcpyDeviceToHost/*, stream*/);
-	//#ifdef DEDISP_DEBUG
-	cudaThreadSynchronize();
-	cudaError_t error = cudaGetLastError();
-	if( error != cudaSuccess ) {
-		return false;
-	}
-	//#endif
-	return true;
+
+/**
+ * @brief Copy device memory to host memory.
+ *
+ * @tparam T
+ * @param dst    Host pointer.
+ * @param src    Device pointer.
+ * @param count  Number of memory blocks to copy.
+ * @return true  If copy is successful.
+ * @return false If data copy fails.
+ */
+template <typename T>
+bool copy_device_to_host(T* dst, const T* src, gpu_size_t count) {
+    cudaMemcpy(dst, src, count * sizeof(T), cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+    cudaError_t error = cudaGetLastError();
+    if (error != cudaSuccess) {
+        return false;
+    }
+    return true;
 }
-#if 0
-// ------- REMOVED --------
-template<typename T>
-bool copy_host_to_symbol(const char* symbol, const T* src,
-						 gpu_size_t count, cudaStream_t stream=0) {
-	// TODO: Can't use Async versions unless host memory is pinned!
-	cudaMemcpyToSymbol/*Async*/(symbol, src,
-							count * sizeof(T),
-							0, cudaMemcpyHostToDevice/*,
-													   stream*/);
-	//#ifdef DEDISP_DEBUG
-	cudaThreadSynchronize();
-	cudaError_t error = cudaGetLastError();
-	if( error != cudaSuccess ) {
-		return false;
-	}
-	//#endif
-	return true;
+
+template <typename T>
+bool copy_host_to_symbol(const T* symbol, const T* src, gpu_size_t count) {
+    cudaMemcpyToSymbol(symbol, src, count * sizeof(T), 0,
+                       cudaMemcpyHostToDevice);
+    cudaDeviceSynchronize();
+    cudaError_t error = cudaGetLastError();
+    if (error != cudaSuccess) {
+        return false;
+    }
+    return true;
 }
-template<typename U, typename T>
-bool copy_device_to_symbol(/*const char**/U symbol, const T* src,
-						   gpu_size_t count, cudaStream_t stream=0) {
-	cudaMemcpyToSymbolAsync(symbol, src,
-							count * sizeof(T),
-							0, cudaMemcpyDeviceToDevice,
-							stream);
-	//#ifdef DEDISP_DEBUG
-	cudaThreadSynchronize();
-	cudaError_t error = cudaGetLastError();
-	if( error != cudaSuccess ) {
-		return false;
-	}
-	//#endif
-	return true;
+
+template <typename T>
+bool copy_device_to_symbol(const T* symbol, const T* src, gpu_size_t count) {
+    cudaMemcpyToSymbol(symbol, src, count * sizeof(T), 0,
+                       cudaMemcpyDeviceToDevice);
+    cudaDeviceSynchronize();
+    cudaError_t error = cudaGetLastError();
+    if (error != cudaSuccess) {
+        return false;
+    }
+    return true;
 }
-// ------- REMOVED --------
-#endif
+
 // Note: Strides must be given in units of bytes
-template<typename T, typename U>
-bool copy_host_to_device_2d(T* dst, gpu_size_t dst_stride,
-                            const U* src, gpu_size_t src_stride,
-                            gpu_size_t width_bytes, gpu_size_t height,
-                            cudaStream_t stream=0) {
-	// TODO: Can't use Async versions unless host memory is pinned!
-	cudaMemcpy2D/*Async*/(dst, dst_stride,//*sizeof(T),
-	                      src, src_stride,//*sizeof(U),
-						  width_bytes, height,
-						  cudaMemcpyHostToDevice/*, stream*/);
-	//#ifdef DEDISP_DEBUG
-	cudaThreadSynchronize();
-	cudaError_t error = cudaGetLastError();
-	if( error != cudaSuccess ) { return false; }
-	//#endif
-	return true;
+template <typename T, typename U>
+bool copy_host_to_device_2d(T* dst,
+                            gpu_size_t dst_stride,
+                            const U* src,
+                            gpu_size_t src_stride,
+                            gpu_size_t width_bytes,
+                            gpu_size_t height) {
+    cudaMemcpy2D(dst, dst_stride, src, src_stride, width_bytes, height,
+                 cudaMemcpyHostToDevice);
+    cudaDeviceSynchronize();
+    cudaError_t error = cudaGetLastError();
+    if (error != cudaSuccess) {
+        return false;
+    }
+    return true;
 }
 
-template<typename T, typename U>
-bool copy_device_to_host_2d(T* dst, gpu_size_t dst_stride,
-                            const U* src, gpu_size_t src_stride,
-                            gpu_size_t width_bytes, gpu_size_t height,
-                            cudaStream_t stream=0) {
-	// TODO: Can't use Async versions unless host memory is pinned!
-	cudaMemcpy2D/*Async*/(dst, dst_stride,
-	                      src, src_stride,
-						  width_bytes, height,
-						  cudaMemcpyDeviceToHost/*, stream*/);
-	//#ifdef DEDISP_DEBUG
-	cudaThreadSynchronize();
-	cudaError_t error = cudaGetLastError();
-	if( error != cudaSuccess ) { return false; }
-	//#endif
-	return true;
+template <typename T, typename U>
+bool copy_device_to_host_2d(T* dst,
+                            gpu_size_t dst_stride,
+                            const U* src,
+                            gpu_size_t src_stride,
+                            gpu_size_t width_bytes,
+                            gpu_size_t height) {
+    cudaMemcpy2D(dst, dst_stride, src, src_stride, width_bytes, height,
+                 cudaMemcpyDeviceToHost);
+    cudaDeviceSynchronize();
+    cudaError_t error = cudaGetLastError();
+    if (error != cudaSuccess) {
+        return false;
+    }
+    return true;
 }
 
-template<typename T, typename U>
-bool copy_device_to_device_2d(T* dst, gpu_size_t dst_stride,
-                              const U* src, gpu_size_t src_stride,
-                              gpu_size_t width_bytes, gpu_size_t height,
-                              cudaStream_t stream=0) {
-	cudaMemcpy2D/*Async*/(dst, dst_stride,
-	                      src, src_stride,
-						  width_bytes, height,
-						  cudaMemcpyDeviceToDevice/*, stream*/);
-	//#ifdef DEDISP_DEBUG
-	cudaThreadSynchronize();
-	cudaError_t error = cudaGetLastError();
-	if( error != cudaSuccess ) { return false; }
-	//#endif
-	return true;
+template <typename T, typename U>
+bool copy_device_to_device_2d(T* dst,
+                              gpu_size_t dst_stride,
+                              const U* src,
+                              gpu_size_t src_stride,
+                              gpu_size_t width_bytes,
+                              gpu_size_t height) {
+    cudaMemcpy2D(dst, dst_stride, src, src_stride, width_bytes, height,
+                 cudaMemcpyDeviceToDevice);
+    cudaDeviceSynchronize();
+    cudaError_t error = cudaGetLastError();
+    if (error != cudaSuccess) {
+        return false;
+    }
+    return true;
 }
