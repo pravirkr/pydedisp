@@ -25,6 +25,7 @@
 //#define DEDISP_BENCHMARK
 
 #include <dedisp/dedisp.hpp>
+#include <dedisp/dm_equations.hpp>
 
 #include <vector>
 #include <algorithm> // For std::fill
@@ -138,19 +139,14 @@ dedisp_error update_scrunch_list(dedisp_plan plan) {
 		return DEDISP_NO_ERROR;
 	}
 	plan->scrunch_list.resize(plan->dm_count);
-	dedisp_error error = generate_scrunch_list(&plan->scrunch_list[0],
-	                                           plan->dm_count,
-	                                           plan->dt,
-	                                           &plan->dm_list[0],
-	                                           plan->nchans,
-	                                           plan->f0,
-	                                           plan->df,
-	                                           plan->pulse_width,
-	                                           plan->scrunch_tol);
-	if( error != DEDISP_NO_ERROR ) {
-		return error;
-	}
-	
+	dm_utils::generate_scrunch_list(plan->scrunch_list,
+	                                plan->dt,
+	                                plan->dm_list,
+	                                plan->nchans,
+	                                plan->f0,
+	                                plan->df,
+	                                plan->pulse_width,
+	                                plan->scrunch_tol);
 	// Allocate on and copy to the device
 	try {
 		plan->d_scrunch_list.resize(plan->dm_count);
@@ -213,7 +209,7 @@ dedisp_error dedisp_create_plan(dedisp_plan* plan_,
 	// Generate delay table and copy to device memory
 	// Note: The DM factor is left out and applied during dedispersion
 	plan->delay_table.resize(plan->nchans);
-	generate_delay_table(&plan->delay_table[0], plan->nchans, dt, f0, df);
+	dm_utils::generate_delay_table(plan->delay_table, plan->nchans, dt, f0, df);
 	try {
 		plan->d_delay_table.resize(plan->nchans);
 	}
@@ -308,7 +304,7 @@ dedisp_error dedisp_generate_dm_list(dedisp_plan plan,
 	
 	// Generate the DM list (on the host)
 	plan->dm_list.clear();
-	generate_dm_list(plan->dm_list,
+	dm_utils::generate_dm_list(plan->dm_list,
 					 dm_start, dm_end,
 					 plan->dt, ti, plan->f0, plan->df,
 					 plan->nchans, tol);
@@ -336,18 +332,6 @@ dedisp_error dedisp_generate_dm_list(dedisp_plan plan,
 	return DEDISP_NO_ERROR;
 }
 
-dedisp_float * dedisp_generate_dm_list_guru (dedisp_float dm_start, dedisp_float dm_end,
-            double dt, double ti, double f0, double df,
-            dedisp_size nchans, double tol, dedisp_size * dm_count)
-{ 
-  std::vector<dedisp_float> dm_table;
-  generate_dm_list(dm_table,
-           dm_start, dm_end,
-           dt, ti, f0, df,
-           nchans, tol);
-  *dm_count = dm_table.size();
-  return &dm_table[0];
-}
 
 dedisp_error dedisp_set_device(int device_idx) {
 	if( cudaGetLastError() != cudaSuccess ) {

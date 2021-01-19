@@ -35,6 +35,11 @@ using gpu_size_t = std::size_t;
 
 template <typename T>
 class Transpose {
+    // cuda specs
+    static const gpu_size_t TILE_DIM           = 32;
+    static const gpu_size_t BLOCK_ROWS         = 8;
+    static const gpu_size_t MAX_GRID_DIMENSION = 65535;
+
 public:
     Transpose() {}
 
@@ -53,12 +58,6 @@ public:
                    cudaStream_t stream = 0) {
         transpose(in, width, height, width, height, out, stream);
     }
-
-private:
-    // cuda specs
-    static const gpu_size_t TILE_DIM           = 32;
-    static const gpu_size_t BLOCK_ROWS         = 8;
-    static const gpu_size_t MAX_GRID_DIMENSION = 65535;
 };
 
 /**

@@ -250,10 +250,6 @@ dedisp_error dedisp_generate_dm_list(dedisp_plan  plan,
                                      dedisp_float pulse_width,
                                      dedisp_float tol);
 
-dedisp_float * dedisp_generate_dm_list_guru (dedisp_float dm_start, dedisp_float dm_end,
-                                     double dt, double ti, double f0, double df,
-                                     dedisp_size nchans, double tol, dedisp_size * dm_count);
-
 
 // Getters
 // -------
