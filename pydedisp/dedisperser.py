@@ -71,7 +71,7 @@ class Dedisp(object):
         assert in_nbits in {1, 2, 4, 8, 16, 32}
 
         nsamps_out = nsamps - self.max_delay
-        dmt = np.zeros(nsamps_out * self.dm_count, dtype=np.uint8)
+        dmt = np.zeros(nsamps_out * self.dm_count, dtype=float)
 
-        self._plan.execute(nsamps, data, in_nbits, dmt, 8, 0)
+        self._plan.execute(nsamps, data, in_nbits, dmt, 0)
         return dmt.reshape(self.dm_count, nsamps_out)

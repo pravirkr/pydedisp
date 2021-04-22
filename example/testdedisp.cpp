@@ -110,7 +110,6 @@ int main(int argc, char* argv[]) {
     dedisp_float pulse_width = 4.0;    // ms
     dedisp_float dm_tol      = 1.25;
     dedisp_size in_nbits     = 8;
-    dedisp_size out_nbits    = 32;
 
     dedisp_plan plan;
     dedisp_error error;
@@ -254,12 +253,11 @@ int main(int argc, char* argv[]) {
            nsamps_computed, nsamps,
            100.0 * (dedisp_float)nsamps_computed / nsamps);
     printf("Output data array size : %lu MB\n",
-           (dm_count * nsamps_computed * (out_nbits / 8)) / (1 << 20));
+           (dm_count * nsamps_computed * (32 / 8)) / (1 << 20));
     printf("\n");
 
     // Allocate space for the output data
-    output = (dedisp_float*)std::malloc(nsamps_computed * dm_count * out_nbits
-                                        / 8);
+    output = (dedisp_float*)std::malloc(nsamps_computed * dm_count * 32 / 8);
     if (output == NULL) {
         printf("\nERROR: Failed to allocate output array\n");
         return -1;
@@ -268,8 +266,8 @@ int main(int argc, char* argv[]) {
     printf("Compute on GPU\n");
     startclock = clock();
     // Compute the dedispersion transform on the GPU
-    error = dedisp_execute(plan, nsamps, input, in_nbits, (dedisp_byte*)output,
-                           out_nbits, DEDISP_USE_DEFAULT);
+    error = dedisp_execute(plan, nsamps, input, in_nbits, output,
+                           DEDISP_USE_DEFAULT);
     if (error != DEDISP_NO_ERROR) {
         printf("\nERROR: Failed to execute dedispersion plan: %s\n",
                dedisp_get_error_string(error));

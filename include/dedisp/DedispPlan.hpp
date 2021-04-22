@@ -69,23 +69,20 @@ public:
     void execute(size_type nsamps,
                  const byte_type* in,
                  size_type in_nbits,
-                 byte_type* out,
-                 size_type out_nbits,
+                 float_type* out,
                  unsigned flags);
     void execute_adv(size_type nsamps,
                      const byte_type* in,
                      size_type in_nbits,
                      size_type in_stride,
-                     byte_type* out,
-                     size_type out_nbits,
+                     float_type* out,
                      size_type out_stride,
                      unsigned flags);
     void execute_guru(size_type nsamps,
                       const byte_type* in,
                       size_type in_nbits,
                       size_type in_stride,
-                      byte_type* out,
-                      size_type out_nbits,
+                      float_type* out,
                       size_type out_stride,
                       size_type first_dm_idx,
                       size_type dm_count,
@@ -175,37 +172,33 @@ DedispPlan::float_type DedispPlan::get_f0() const {
 void DedispPlan::execute(size_type nsamps,
                          const byte_type* in,
                          size_type in_nbits,
-                         byte_type* out,
-                         size_type out_nbits,
+                         float_type* out,
                          unsigned flags) {
-    check_error(
-        dedisp_execute(m_plan, nsamps, in, in_nbits, out, out_nbits, flags),
-        "dedisp_execute");
+    check_error(dedisp_execute(m_plan, nsamps, in, in_nbits, out, flags),
+                "dedisp_execute");
 }
 void DedispPlan::execute_adv(size_type nsamps,
                              const byte_type* in,
                              size_type in_nbits,
                              size_type in_stride,
-                             byte_type* out,
-                             size_type out_nbits,
+                             float_type* out,
                              size_type out_stride,
                              unsigned flags) {
     check_error(dedisp_execute_adv(m_plan, nsamps, in, in_nbits, in_stride, out,
-                                   out_nbits, out_stride, flags),
+                                   out_stride, flags),
                 "dedisp_execute_adv");
 }
 void DedispPlan::execute_guru(size_type nsamps,
                               const byte_type* in,
                               size_type in_nbits,
                               size_type in_stride,
-                              byte_type* out,
-                              size_type out_nbits,
+                              float_type* out,
                               size_type out_stride,
                               size_type first_dm_idx,
                               size_type dm_count,
                               unsigned flags) {
     check_error(dedisp_execute_guru(m_plan, nsamps, in, in_nbits, in_stride,
-                                    out, out_nbits, out_stride, first_dm_idx,
-                                    dm_count, flags),
+                                    out, out_stride, first_dm_idx, dm_count,
+                                    flags),
                 "dedisp_execute_guru");
 }

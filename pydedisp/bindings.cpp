@@ -32,12 +32,12 @@ inline pybind11::array_t<T> get_ndarray_readonly(const T* in_array,
 }  // namespace array_utils
 
 PYBIND11_MODULE(_libdedisp, mod) {
-    mod.doc()               = "dedisp class functions";
-    //mod.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
+    mod.doc() = "dedisp class functions";
+    // mod.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
 
     py::class_<DedispPlan> clsDedispPlan(mod, "DedispPlan");
     // Copy constructor
-    //clsDedispPlan.def(py::init<const DedispPlan&>(), "other"_a);
+    // clsDedispPlan.def(py::init<const DedispPlan&>(), "other"_a);
     // Default constructor
     clsDedispPlan.def(
         py::init<dedisp_size, dedisp_float, dedisp_float, dedisp_float>(),
@@ -119,38 +119,36 @@ PYBIND11_MODULE(_libdedisp, mod) {
         .def("execute",
              [](DedispPlan& plan, dedisp_size nsamps,
                 const py::array_t<dedisp_byte>& in, dedisp_size in_nbits,
-                py::array_t<dedisp_byte>& out, dedisp_size out_nbits,
-                unsigned flags) {
+                py::array_t<dedisp_float>& out, unsigned flags) {
                  plan.execute(
                      nsamps, reinterpret_cast<const dedisp_byte*>(in.data()),
                      in_nbits,
-                     reinterpret_cast<dedisp_byte*>(out.mutable_data()),
-                     out_nbits, flags);
+                     reinterpret_cast<dedisp_float*>(out.mutable_data()),
+                     flags);
              })
 
         .def("execute_adv",
              [](DedispPlan& plan, dedisp_size nsamps,
                 const py::array_t<dedisp_byte>& in, dedisp_size in_nbits,
-                dedisp_size in_stride, py::array_t<dedisp_byte>& out,
-                dedisp_size out_nbits, dedisp_size out_stride, unsigned flags) {
+                dedisp_size in_stride, py::array_t<dedisp_float>& out,
+                dedisp_size out_stride, unsigned flags) {
                  plan.execute_adv(
                      nsamps, reinterpret_cast<const dedisp_byte*>(in.data()),
                      in_nbits, in_stride,
-                     reinterpret_cast<dedisp_byte*>(out.mutable_data()),
-                     out_nbits, out_stride, flags);
+                     reinterpret_cast<dedisp_float*>(out.mutable_data()),
+                     out_stride, flags);
              })
 
         .def("execute_guru",
              [](DedispPlan& plan, dedisp_size nsamps,
                 const py::array_t<dedisp_byte>& in, dedisp_size in_nbits,
-                dedisp_size in_stride, py::array_t<dedisp_byte>& out,
-                dedisp_size out_nbits, dedisp_size out_stride,
-                dedisp_size first_dm_idx, dedisp_size dm_count,
-                unsigned flags) {
+                dedisp_size in_stride, py::array_t<dedisp_float>& out,
+                dedisp_size out_stride, dedisp_size first_dm_idx,
+                dedisp_size dm_count, unsigned flags) {
                  plan.execute_guru(
                      nsamps, reinterpret_cast<const dedisp_byte*>(in.data()),
                      in_nbits, in_stride,
-                     reinterpret_cast<dedisp_byte*>(out.mutable_data()),
-                     out_nbits, out_stride, first_dm_idx, dm_count, flags);
+                     reinterpret_cast<dedisp_float*>(out.mutable_data()),
+                     out_stride, first_dm_idx, dm_count, flags);
              });
 }

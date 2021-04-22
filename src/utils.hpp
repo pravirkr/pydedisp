@@ -19,7 +19,7 @@ T div_up(T a, T b) {
     // return (a % b != 0) ? (a / b + 1) : (a / b);
 }
 
-/*
+
 // Internal abstraction for errors
 #if defined(DEDISP_DEBUG) && DEDISP_DEBUG
 #define throw_error(error)                                             \
@@ -39,4 +39,3 @@ T div_up(T a, T b) {
 #define throw_getter_error(error, retval) return retval
 #endif  // DEDISP_DEBUG
 // ------------------------
-*/
